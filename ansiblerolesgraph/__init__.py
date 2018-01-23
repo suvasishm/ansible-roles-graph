@@ -12,7 +12,6 @@ __author__  = 'Sebastien Nicouleaud'
 
 def parse_args(args):
     """Parse the command-line arguments and return a config object.
-
         >>> config = parse_args(['-o', 'schema.jpg',
         ...                      '-f', 'jpg',
         ...                      'roles/',
@@ -23,9 +22,7 @@ def parse_args(args):
         'jpg'
         >>> config.roles_dirs
         ['roles/', '../other/roles']
-
     Provides sane defaults:
-
         >>> config = parse_args([])
         >>> config.output
         'ansible-roles.png'
@@ -77,8 +74,11 @@ def parse_roles(roles_dirs, builder=GraphBuilder()):
             builder.add_role(dependent_role)
 
             with open(path, 'r') as f:
-                for dependency in yaml.load(f.read())['dependencies']:
-                    depended_role = dependency['role']
+                for dependency in yaml.load(f.read())['dependencies'] or []:
+                    if type(dependency) is str:
+                        depended_role = dependency
+                    else:
+                        depended_role = dependency.get('role')
 
                     builder.add_role(depended_role)
                     builder.link_roles(dependent_role, depended_role)
